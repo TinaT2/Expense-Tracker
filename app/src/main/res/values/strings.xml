@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Expense Tracker</string>
+    <string name="login_title">Login to Your Account</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_google">Sign in with Google</string>
+    <string name="error_empty_fields">Please enter both email and password!</string>
+</resources>
