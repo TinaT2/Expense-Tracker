@@ -12,7 +12,28 @@
           "package_name": "com.example.expensetracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1078296160693-s5nq7ur1ji7qt33m3u6ghc9o22f8ot01.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.expensetracker",
+            "certificate_hash": "ecc3edeab2e319ae6b2a3585778188839f53d8fc"
+          }
+        },
+        {
+          "client_id": "1078296160693-ub83ghm052339dur84m50ulcu05af1go.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.expensetracker",
+            "certificate_hash": "89e007363a658b33e1dafb65c80b7b625aa034c9"
+          }
+        },
+        {
+          "client_id": "1078296160693-d27hos5a7loe60hmq5j9f7lsl1jt63i6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA-eqLMucXf__X3VVtJ464jGs7Brh9bbIc"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1078296160693-d27hos5a7loe60hmq5j9f7lsl1jt63i6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

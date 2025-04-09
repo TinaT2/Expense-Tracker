@@ -2,6 +2,7 @@ package com.example.expensetracker
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -36,14 +37,27 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    val TAG = "Sign in"
+    private lateinit var credentialManager: CredentialManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        credentialManager = CredentialManager.create(this)
         enableEdgeToEdge()
         setContent {
             ExpenseTrackerTheme {
@@ -53,7 +67,9 @@ class MainActivity : ComponentActivity() {
                         uiState = viewModel.uiState,
                         padding = innerPadding,
                         onLogin = { _, _ -> },
-                        onGoogleLogin = {},
+                        onGoogleLogin = {
+                            loginWithGoogle()
+                        },
                         updateEmail = { viewModel.updateEmail(it) },
                         updatePassword = { viewModel.updatePassword(it) },
                         updateErrorMessage = { viewModel.updateErrorMessage(it) })
@@ -61,135 +77,197 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-fun LoginScreen(
-    uiState: LoginUiState,
-    padding: PaddingValues,
-    onLogin: (String, String) -> Unit,
-    onGoogleLogin: () -> Unit,
-    updateEmail: (String) -> Unit,
-    updatePassword: (String) -> Unit,
-    updateErrorMessage: (String) -> Unit,
-) {
-    val emptyError = stringResource(id = R.string.error_empty_fields)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(padding),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(id = R.string.login_title),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+    private fun loginWithGoogle() {
+        val signInWithGoogleOption: GetSignInWithGoogleOption =
+            GetSignInWithGoogleOption.Builder(webAuthId)
+                .build()
+//todo        .setNonce(<nonce string to use when generating a Google ID token>)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = uiState.email,
-            onValueChange = { updateEmail(it) },
-            label = { Text(stringResource(id = R.string.email_label)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = uiState.password,
-            onValueChange = { updatePassword(it) },
-            label = { Text(stringResource(id = R.string.password_label)) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        uiState.errorMessage?.let {
-            Text(text = it, color = Color.Red, fontSize = 14.sp)
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(signInWithGoogleOption)
+            .build()
+        lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = applicationContext,
+                )
+                handleSignIn(result)
+            } catch (e: GetCredentialException) {
+                handleFailure(e)
+            }
         }
 
-        Button(
-            onClick = {
-                if (uiState.email.isNotEmpty() && uiState.password.isNotEmpty()) {
-                    onLogin(uiState.email, uiState.password)
-                } else {
-                    updateErrorMessage(emptyError)
+    }
+
+    fun handleSignIn(result: GetCredentialResponse) {
+        // Handle the successfully returned credential.
+        val credential = result.credential
+
+        when (credential) {
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        // Use googleIdTokenCredential and extract id to validate and
+                        // authenticate on your server.
+                        val googleIdTokenCredential = GoogleIdTokenCredential
+                            .createFrom(credential.data)
+                        Log.v(TAG, "Login success: ${googleIdTokenCredential.id}")
+                    } catch (e: GoogleIdTokenParsingException) {
+                        Log.e(TAG, "Received an invalid google id token response", e)
+                    }
                 }
-            },
+            }
+
+            else -> {
+                // Catch any unrecognized credential type here.
+                Log.e(TAG, "Unexpected type of credential")
+            }
+        }
+    }
+
+    fun handleFailure(e: GetCredentialException) {
+        Log.e(TAG, "Sign in failed", e)
+    }
+
+    @Composable
+    fun LoginScreen(
+        uiState: LoginUiState,
+        padding: PaddingValues,
+        onLogin: (String, String) -> Unit,
+        onGoogleLogin: () -> Unit,
+        updateEmail: (String) -> Unit,
+        updatePassword: (String) -> Unit,
+        updateErrorMessage: (String) -> Unit,
+    ) {
+        val emptyError = stringResource(id = R.string.error_empty_fields)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(padding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(id = R.string.login_title),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = uiState.email,
+                onValueChange = { updateEmail(it) },
+                label = { Text(stringResource(id = R.string.email_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = uiState.password,
+                onValueChange = { updatePassword(it) },
+                label = { Text(stringResource(id = R.string.password_label)) },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            uiState.errorMessage?.let {
+                Text(text = it, color = Color.Red, fontSize = 14.sp)
+            }
+
+            Button(
+                onClick = {
+                    if (uiState.email.isNotEmpty() && uiState.password.isNotEmpty()) {
+                        onLogin(uiState.email, uiState.password)
+                    } else {
+                        updateErrorMessage(emptyError)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.login_button))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            GoogleSignInButton(onClick = onGoogleLogin)
+        }
+    }
+
+    @Composable
+    fun GoogleSignInButton(onClick: () -> Unit) {
+        Button(
+            onClick = onClick,
+            border = BorderStroke(1.dp, Color.Gray),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.login_button))
+            Icon(Icons.Default.AccountCircle, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(id = R.string.login_google))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        GoogleSignInButton(onClick = onGoogleLogin)
     }
-}
-
-@Composable
-fun GoogleSignInButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        border = BorderStroke(1.dp, Color.Gray),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Icon(Icons.Default.AccountCircle, contentDescription = null)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = stringResource(id = R.string.login_google))
-    }
-}
 
 
-@Preview(name = "Light Mode", showBackground = true, uiMode = Configuration.UI_MODE_TYPE_NORMAL)
-@Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun LoginScreenPreview() {
-    val previewState = object : LoginUiState {
-        override val email = "test@example.com"
-        override val password = "123456"
-        override val errorMessage = "Email or password is wrong"
+    @Preview(name = "Light Mode", showBackground = true, uiMode = Configuration.UI_MODE_TYPE_NORMAL)
+    @Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+    @Composable
+    fun LoginScreenPreview() {
+        val previewState = object : LoginUiState {
+            override val email = "test@example.com"
+            override val password = "123456"
+            override val errorMessage = "Email or password is wrong"
+        }
+        ExpenseTrackerTheme {
+            LoginScreen(
+                uiState = previewState,
+                padding = PaddingValues(16.dp),
+                onLogin = { email, pass -> },
+                onGoogleLogin = {},
+                updateEmail = {},
+                updatePassword = {},
+                updateErrorMessage = {}
+            )
+        }
     }
-    ExpenseTrackerTheme {
-        LoginScreen(
-            uiState = previewState,
-            padding = PaddingValues(16.dp),
-            onLogin = { email, pass -> },
-            onGoogleLogin = {},
-            updateEmail = {},
-            updatePassword = {},
-            updateErrorMessage = {}
-        )
-    }
-}
 
-@Preview(name = "Dynamic Light Mode", showBackground = true, uiMode = Configuration.UI_MODE_TYPE_NORMAL)
-@Preview(name = "Dynamic Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun LoginScreenDynamicColorPreview() {
-    val previewState = object : LoginUiState {
-        override val email = "test@example.com"
-        override val password = "123456"
-        override val errorMessage = null
-    }
-    ExpenseTrackerTheme(dynamicColor = false) {
-        LoginScreen(
-            uiState = previewState,
-            padding = PaddingValues(16.dp),
-            onLogin = { email, pass -> },
-            onGoogleLogin = {},
-            updateEmail = {},
-            updatePassword = {},
-            updateErrorMessage = {}
-        )
+    @Preview(
+        name = "Dynamic Light Mode",
+        showBackground = true,
+        uiMode = Configuration.UI_MODE_TYPE_NORMAL
+    )
+    @Preview(
+        name = "Dynamic Dark Mode",
+        showBackground = true,
+        uiMode = Configuration.UI_MODE_NIGHT_YES
+    )
+    @Composable
+    fun LoginScreenDynamicColorPreview() {
+        val previewState = object : LoginUiState {
+            override val email = "test@example.com"
+            override val password = "123456"
+            override val errorMessage = null
+        }
+        ExpenseTrackerTheme(dynamicColor = false) {
+            LoginScreen(
+                uiState = previewState,
+                padding = PaddingValues(16.dp),
+                onLogin = { email, pass -> },
+                onGoogleLogin = {},
+                updateEmail = {},
+                updatePassword = {},
+                updateErrorMessage = {}
+            )
+        }
     }
 }
