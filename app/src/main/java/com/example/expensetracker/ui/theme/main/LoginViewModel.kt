@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.ui.theme.main
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue

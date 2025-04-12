@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.ui.theme.main
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -44,7 +44,9 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import com.example.expensetracker.R
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
+import com.example.expensetracker.webAuthId
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException

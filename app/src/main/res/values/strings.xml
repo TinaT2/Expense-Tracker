@@ -6,4 +6,9 @@
     <string name="login_button">Login</string>
     <string name="login_google">Sign in with Google</string>
     <string name="error_empty_fields">Please enter both email and password!</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="monthly_summary">Monthly Summary</string>
+    <string name="total_expenses">Total Expenses</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="expense_chart_title">Expense Chart</string>
 </resources>
