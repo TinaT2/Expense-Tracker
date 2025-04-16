@@ -11,4 +11,5 @@
     <string name="total_expenses">Total Expenses</string>
     <string name="add_expense">Add Expense</string>
     <string name="expense_chart_title">Expense Chart</string>
+    <string name="category">Category</string>
 </resources>

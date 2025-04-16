@@ -1,8 +1,10 @@
 package com.example.expensetracker.ui.theme.dashboard
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +20,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -32,7 +37,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -67,21 +74,37 @@ fun DashboardScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.inversePrimary,
+                        MaterialTheme.colorScheme.onTertiary
+                    )
+                )
+            )
             .padding(padding)
             .padding(16.dp)
+
     ) {
         Text(
             text = stringResource(id = R.string.dashboard_title),
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = onAddExpenseClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors()
+                .copy(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
         ) {
-            Text(stringResource(id = R.string.add_expense))
+            Text(
+                stringResource(id = R.string.add_expense),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,7 +114,8 @@ fun DashboardScreen(
 
         Text(
             text = stringResource(id = R.string.expense_chart_title),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -162,31 +186,58 @@ fun CategoryMenu(
 ) {
     var expanded: Boolean by remember { mutableStateOf<Boolean>(false) }
     Row(modifier = Modifier.clickable { expanded = true }) {
-        Text(text = "دسته بندی", style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = stringResource(R.string.category),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier
+                .align(
+                    Alignment.CenterVertically
+                )
+                .padding(start = 8.dp),
+            color = MaterialTheme.colorScheme.onBackground
+        )
         Spacer(modifier = Modifier.weight(1f))
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            categoryList.forEach {
-                DropdownMenuItem(
-                    text = { Text(text = it.name) },
-                    onClick = {
-                        updateSelectedCategory(it)
-                        expanded = false
-                    })
+        Box {
+            OutlinedButton(
+                onClick = { expanded = true },
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Text(
+                    text = selectedCategory.name, style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                categoryList.forEach {
+                    DropdownMenuItem(
+                        text = { Text(text = it.name) },
+                        onClick = {
+                            updateSelectedCategory(it)
+                            expanded = false
+                        })
+                }
             }
         }
+
     }
 }
 
 @Composable
 fun ExpenseItem(expense: ExpensePresenter) {
-//    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
     Box(
         modifier = Modifier
-            .padding(vertical = 8.dp)
+            .padding(vertical = 2.dp)
             .background(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(20)
+                color = Color.Transparent,
+                shape = RoundedCornerShape(20),
             )
+            .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20))
             .padding(
                 vertical = 24.dp,
                 horizontal = 8.dp
@@ -194,16 +245,28 @@ fun ExpenseItem(expense: ExpensePresenter) {
     ) {
 
         Row {
-            Text(text = expense.name, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = expense.name, style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(Modifier.weight(1f))
 
-            Text(text = expense.value.toString(), style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = expense.value.toString(), style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(Modifier.width(16.dp))
-            Text(text = expense.date, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = expense.date, style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(Modifier.width(16.dp))
-            Icon(Icons.Default.MoreVert, contentDescription = "expense_more")
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = "expense_more",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-//        }
     }
 }
 

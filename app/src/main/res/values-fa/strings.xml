@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مخارج</string>
+    <string name="expense_chart_title">نمودار مخارج</string>
+    <string name="category">دسته بندی</string>
+    <string name="login_title">وارد شوید</string>
+    <string name="email_label">ایمیل</string>
+    <string name="password_label">رمز عبور</string>
+    <string name="login_button">ورود</string>
+    <string name="login_google">ورود با گوگل</string>
+    <string name="error_empty_fields">لطفا مقادیر خالی را پر نمایید</string>
+    <string name="dashboard_title">داشبورد</string>
+    <string name="monthly_summary">گزارش ماهانه</string>
+    <string name="total_expenses">مجموع مخارج</string>
+    <string name="add_expense">افزودن خرج</string>
+</resources>
