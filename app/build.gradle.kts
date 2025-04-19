@@ -2,9 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -46,7 +46,7 @@ dependencies {
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
@@ -55,6 +55,11 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.jalali.datepicker.compose)
     implementation (libs.jalalicalendar)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -72,9 +77,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-}
-
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
 }
