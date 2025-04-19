@@ -48,9 +48,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.data.CategoryPresenter
-import com.example.expensetracker.data.ExpenseChartPresenter
-import com.example.expensetracker.data.ExpensePresenter
+import com.example.expensetracker.data.local.entities.CategoryPresenter
+import com.example.expensetracker.data.local.entities.ExpenseChartPresenter
+import com.example.expensetracker.data.local.entities.ExpensePresenter
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 
 @Composable

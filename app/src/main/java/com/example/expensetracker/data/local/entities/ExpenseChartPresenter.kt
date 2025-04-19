@@ -1,4 +1,4 @@
-package com.example.expensetracker.data
+package com.example.expensetracker.data.local.entities
 
 data class ExpenseChartPresenter(
     val category: String,

@@ -6,9 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.CategoryPresenter
-import com.example.expensetracker.data.ExpenseChartPresenter
-import com.example.expensetracker.data.ExpensePresenter
+import com.example.expensetracker.data.local.entities.CategoryPresenter
+import com.example.expensetracker.data.local.entities.ExpenseChartPresenter
+import com.example.expensetracker.data.local.entities.ExpensePresenter
+import com.example.expensetracker.data.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ private class MutableDashboardUiState : DashboardUiState {
 }
 
 @HiltViewModel
-class DashboardViewModel @Inject constructor() : ViewModel() {
+class DashboardViewModel @Inject constructor(expenseRepository: ExpenseRepository) : ViewModel() {
 
     private val _uiState = MutableDashboardUiState()
     val uiState: DashboardUiState = _uiState
@@ -44,10 +45,12 @@ class DashboardViewModel @Inject constructor() : ViewModel() {
     }
 
     fun loadExpenseList() {
+        //todo getItFromDb
         _uiState.expenseList = mockExpenseList()
     }
 
     fun loadCategoryList() {
+        //todo getItFromDb
         _uiState.categoryList = mockCategoryList()
     }
 
